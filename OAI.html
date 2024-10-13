@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Image Classification</title>
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            font-family: 'Roboto', sans-serif;
+            height: 100vh;
+            width: 100vw;
+            overflow: hidden;
+        }
+
+        /* Navbar Styles */
+        .navbar {
+            position: absolute;
+            top: 0;
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px 40px;
+            background: linear-gradient(90deg, #dfa252f1, #c51a1a);
+            box-shadow: 0 4px 8px rgba(24, 15, 4, 0.2);
+            color: rgb(221, 206, 206);
+            z-index: 1;
+        }
+
+        .navbar .logo {
+            font-size: 28px;
+            font-weight: bold;
+            background: linear-gradient(90deg, #d1b202, #FFA726);
+            -webkit-background-clip: text;
+            color: transparent;
+            text-shadow: 3px 3px 6px rgba(255, 140, 0, 0.9);
+        }
+
+        .navbar button {
+            background: linear-gradient(90deg, #FFA726, #FF5722);
+            border: none;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 30px;
+            cursor: pointer;
+            position: absolute;
+            left: 20px;
+            transition: 0.3s ease;
+        }
+
+        .navbar button:hover {
+            background: linear-gradient(90deg, #FF5722, #FFA726);
+        }
+
+        /* Homepage Styling */
+        #homepage {
+            background: url('https://miro.medium.com/v2/resize:fit:4800/format:webp/1*Eh1ju0aZiQP5Q6UJ-KdevQ.jpeg') no-repeat center center fixed;
+            background-size: cover;
+            height: 100vh;
+            width: 100vw;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #ffffff;
+        }
+
+        #homepage .container {
+            background: rgba(0, 0, 0, 0.5);
+            width: 60%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            border-radius: 20px;
+            box-shadow: 0px 0px 20px rgba(0, 0, 0, 0.4);
+        }
+
+        #homepage h1 {
+            font-size: 50px;
+            background: linear-gradient(90deg, #FF6F61, #FFC107);
+            -webkit-background-clip: text;
+            color: transparent;
+            text-shadow: 4px 4px 8px rgba(255, 140, 0, 0.9);
+        }
+
+        #homepage h2 {
+            font-size: 36px;
+            margin: 20px 0;
+        }
+
+        .button-group button {
+            padding: 15px 30px;
+            margin: 10px;
+            font-size: 18px;
+            border: none;
+            border-radius: 30px;
+            background: linear-gradient(45deg, #FF6F61, #FFD700);
+            color: white;
+            cursor: pointer;
+            transition: 0.3s ease;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+        }
+
+        .button-group button:hover {
+            background: linear-gradient(45deg, #FFC75F, #FF6F61);
+            transform: scale(1.05);
+        }
+
+        /* Model Page Styling */
+        #model-page {
+            display: none;
+            background: url('https://media.licdn.com/dms/image/v2/D4E12AQHzcg9kuSVipw/article-cover_image-shrink_720_1280/article-cover_image-shrink_720_1280/0/1703163734552?e=2147483647&v=beta&t=TJ6YJG_9TDSUyaIpHAXhVKYZMGwgbIcc2Vd1Hnoyykw') no-repeat center center fixed;
+            background-size: cover;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            width: 100vw;
+            color: #ffffff;
+        }
+
+        #model-page .container {
+            background: rgba(0, 0, 0, 0.7);
+            width: 60%;
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0px 0px 20px rgba(0, 0, 0, 0.6);
+            text-align: center;
+        }
+
+        #model-page h1 {
+            font-size: 36px;
+            background: linear-gradient(90deg, #FF6F61, #FFC107);
+            -webkit-background-clip: text;
+            color: transparent;
+            text-shadow: 4px 4px 8px rgba(255, 140, 0, 0.9);
+        }
+
+        #webcam-container {
+            display: flex;
+            justify-content: center;
+            margin: 0 auto;
+            border: 3px solid #ffffff;
+            border-radius: 10px;
+            background: rgba(22, 22, 21, 0.7);
+            padding: 20px;
+            width: 350px;
+            height: 350px;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.4);
+        }
+
+        #label-container {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            background: rgba(0, 0, 0, 0.5);
+            padding: 20px;
+            border-radius: 10px;
+            color: #ffffff;
+            margin-top: 20px;
+        }
+
+        #label-container div {
+            font-size: 20px;
+            background: linear-gradient(90deg, #FF6F61, #FFC107);
+            border: none;
+            padding: 10px 20px;
+            border-radius: 20px;
+            transition: 0.3s ease;
+            color: white;
+            cursor: pointer;
+        }
+
+        #camera-select {
+            padding: 10px;
+            margin-bottom: 20px;
+            border: 2px solid #FFD700;
+            border-radius: 20px;
+            font-size: 16px;
+            background: #fff8e7;
+        }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest/dist/tf.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@teachablemachine/image@latest/dist/teachablemachine-image.min.js"></script>
+</head>
+<body>
+    <!-- Navbar -->
+    <div class="navbar">
+        <div class="logo">AI IMAGE CLASSIFICATION</div>
+        <button onclick="showHomepage()">Back</button>
+    </div>
+
+    <!-- Homepage Section -->
+    <div id="homepage">
+        <div class="container">
+            <h1>AI Image Classification</h1>
+            <h2>Using Teachable Machine</h2>
+            <p>Welcome to our AI Image Classification project! We use machine learning techniques to classify different images in real time. Click "Start Classifying" to begin.</p>
+            <div class="button-group">
+                <button onclick="showModelPage()">Start Classifying</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Model Page Section -->
+    <div id="model-page">
+        <div class="container">
+            <h1>AI Image Classification with Teachable Machine</h1>
+            <select id="camera-select">
+                <option value="default">Default Camera</option>
+            </select>
+            <div id="webcam-container"></div>
+            <div id="label-container">
+                <div id="label-1">ขวดน้ำ: 0.00</div>
+                <div id="label-2">กระปุกออมสิน: 0.00</div>
+                <div id="label-3">พื้นหลัง: 0.00</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function showModelPage() {
+            document.getElementById('homepage').style.display = 'none';
+            document.getElementById('model-page').style.display = 'flex';
+            init();
+        }
+
+        function showHomepage() {
+            document.getElementById('model-page').style.display = 'none';
+            document.getElementById('homepage').style.display = 'flex';
+        }
+
+        const URL = "https://teachablemachine.withgoogle.com/models/KvwHQQfdg/";
+        let model, webcam, labelContainer, maxPredictions;
+
+        async function init() {
+            const modelURL = URL + "model.json";
+            const metadataURL = URL + "metadata.json";
+            model = await tmImage.load(modelURL, metadataURL);
+            maxPredictions = model.getTotalClasses();
+
+            navigator.mediaDevices.enumerateDevices().then(devices => {
+                devices.forEach(device => {
+                    if (device.kind === 'videoinput') {
+                        const option = document.createElement('option');
+                        option.value = device.deviceId;
+                        option.text = device.label || `Camera ${document.getElementById('camera-select').length + 1}`;
+                        document.getElementById('camera-select').appendChild(option);
+                    }
+                });
+            });
+
+            const flip = true;
+            const selectedCamera = document.getElementById('camera-select').value;
+
+            webcam = new tmImage.Webcam(350, 350, flip);
+            await webcam.setup({ deviceId: selectedCamera });
+            await webcam.play();
+            window.requestAnimationFrame(loop);
+
+            document.getElementById("webcam-container").appendChild(webcam.canvas);
+            labelContainer = document.getElementById("label-container");
+        }
+
+        async function loop() {
+            webcam.update();
+            await predict();
+            window.requestAnimationFrame(loop);
+        }
+
+        async function predict() {
+            const prediction = await model.predict(webcam.canvas);
+            document.getElementById("label-1").innerHTML = `ขวดน้ำ: ${prediction[0].probability.toFixed(2)}`;
+            document.getElementById("label-2").innerHTML = `กระปุกออมสิน: ${prediction[1].probability.toFixed(2)}`;
+            document.getElementById("label-3").innerHTML = `พื้นหลัง: ${prediction[2].probability.toFixed(2)}`;
+        }
+    </script>
+</body>
+</html>
